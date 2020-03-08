@@ -18,7 +18,7 @@ data = { 'name': [input] }
 
 def formatPrediction(prediction):
 	if prediction:
-		return 'GOAT!'
+		return 'GOAT!!!'
 	else:
 		return 'not the goat ...'
 
