@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import json
+import os
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
