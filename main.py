@@ -16,9 +16,9 @@ train_df = pd.read_csv('train.csv')
 
 def formatPrediction(prediction):
 	if prediction == '1':
-		return 'GOAT!!!'
+		return True
 	else:
-		return 'not the goat ...'
+		return False
 
 train_x = train_df[['name']]
 train_y = train_df[['Goat-status']]
@@ -37,10 +37,9 @@ app = Flask(__name__)
 @app.route('/goat/<name>', methods=['GET'])
 def getPrediction(name):
 	data = pd.DataFrame({ 'name': [name] })
-	print(data)
 	encoded = encoder.transform(data)
 	prediction = np.array2string(model.predict(encoded)[0])
-	return formatPrediction(prediction)
+	return json.dumps(formatPrediction(prediction))
 
 if __name__ == '__main__':
 	model = pickle.load(open(MODEL_FILE_NAME, 'rb'))
