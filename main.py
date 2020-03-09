@@ -14,31 +14,23 @@ MODEL_FILE_NAME = 'model.pickle';
 
 train_df = pd.read_csv('train.csv')
 
-data = { 'name': [input] }
-
 def formatPrediction(prediction):
-	if prediction:
+	if prediction == '1':
 		return 'GOAT!!!'
 	else:
 		return 'not the goat ...'
 
 train_x = train_df[['name']]
 train_y = train_df[['Goat-status']]
-test_x = pd.read_csv('test.csv')[['name']]
-test_x = pd.DataFrame(data)
 
 encoder = OneHotEncoder(handle_unknown='ignore')
 encoder.fit(train_x)
 train_x_featurized = encoder.transform(train_x)
-test_x_featurized = encoder.transform(test_x)
 
 neigh = KNeighborsClassifier(n_neighbors=1)
 neigh.fit(train_x_featurized, train_y.values.ravel())
 
 pickle.dump(neigh, open(MODEL_FILE_NAME, 'wb'))
-
-prediction = neigh.predict(test_x_featurized)
-print(formatPrediction(prediction))
 
 app = Flask(__name__)
 
@@ -47,7 +39,7 @@ def getPrediction(name):
 	data = pd.DataFrame({ 'name': [name] })
 	print(data)
 	encoded = encoder.transform(data)
-	prediction = np.array2string(model.predict(encoded))
+	prediction = np.array2string(model.predict(encoded)[0])
 	return formatPrediction(prediction)
 
 if __name__ == '__main__':
