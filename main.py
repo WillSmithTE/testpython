@@ -7,6 +7,7 @@ import os
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
 from flask import Flask, request, redirect, url_for, flash, jsonify
+from flask_cors import CORS
 
 input = 'patty mills'
 
@@ -33,6 +34,7 @@ neigh.fit(train_x_featurized, train_y.values.ravel())
 pickle.dump(neigh, open(MODEL_FILE_NAME, 'wb'))
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/goat/<name>', methods=['GET'])
 def getPrediction(name):
