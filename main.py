@@ -3,17 +3,19 @@ import numpy as np
 import pickle
 import json
 import os
+import logging
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.neural_network import MLPClassifier
 from flask import Flask, request, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 
-input = 'patty mills'
-
 MODEL_FILE_NAME = 'model.pickle';
 
-train_df = pd.read_csv('train.csv')
+dataset = pd.read_csv('train.csv')
+
+CATEGORICAL_FEATURES = [ 'college' ]
 
 def formatPrediction(prediction):
 	if prediction == '1':
@@ -21,17 +23,38 @@ def formatPrediction(prediction):
 	else:
 		return False
 
-train_x = train_df[['name']]
-train_y = train_df[['Goat-status']]
+train_y = dataset[['score']]
 
-encoder = OneHotEncoder(handle_unknown='ignore')
-encoder.fit(train_x)
-train_x_featurized = encoder.transform(train_x)
+def transformData(data):
+	output = data
+	for feature in CATEGORICAL_FEATURES:
+		categorical = pd.Categorical(output[feature])
+		dummies = pd.get_dummies(categorical, prefix=feature, columns=categorical.unique())
+		output = pd.concat([ output, dummies ])
+		del output[feature]
+	return output
 
-neigh = KNeighborsClassifier(n_neighbors=1)
-neigh.fit(train_x_featurized, train_y.values.ravel())
+# dataset = transformData(dataset)
+del dataset['name']
+dataset = pd.get_dummies(dataset)
+logging.error(dataset.head().to_string())
 
-pickle.dump(neigh, open(MODEL_FILE_NAME, 'wb'))
+del dataset['score']
+# del dataset['name']
+
+logging.error(dataset.head().to_string())
+
+classifier = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1)
+classifier.fit(dataset, train_y)
+
+pickle.dump(classifier, open(MODEL_FILE_NAME, 'wb'))
+
+DERPINPUT = { 'college': ['floridastateuniversity'], 'rings': [0] }
+asDataFrame = pd.DataFrame(DERPINPUT)
+featurized = transformData(asDataFrame)
+derpprediction = classifier.predict(featurized)
+
+logging.error(derpprediction)
 
 app = Flask(__name__)
 CORS(app)
