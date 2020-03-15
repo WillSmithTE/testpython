@@ -39,7 +39,7 @@ del dataset['score']
 dataset = pd.get_dummies(dataset)
 
 
-classifier = MLPClassifier(solver='lbfgs', alpha=1e-5, max_iter=2000, random_state=1)
+classifier = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), max_iter=2000, random_state=1)
 classifier.fit(dataset, train_y.values.ravel())
 
 # pickle.dump(classifier, open(MODEL_FILE_NAME, 'wb'))
