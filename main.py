@@ -34,27 +34,15 @@ def transformData(data):
 		del output[feature]
 	return output
 
-# dataset = transformData(dataset)
 del dataset['name']
+del dataset['score']
 dataset = pd.get_dummies(dataset)
 
-del dataset['score']
-# del dataset['name']
 
-classifier = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1)
-classifier.fit(dataset, train_y)
+classifier = MLPClassifier(solver='lbfgs', alpha=1e-5, max_iter=2000, random_state=1)
+classifier.fit(dataset, train_y.values.ravel())
 
 # pickle.dump(classifier, open(MODEL_FILE_NAME, 'wb'))
-
-DERPINPUT = { 'college': ['college_floridastateuniversity'], 'rings': [10] }
-asDataFrame = pd.DataFrame(DERPINPUT)
-# featurized = transformData(asDataFrame)
-asDataFrame = asDataFrame.reindex(columns = dataset.columns, fill_value=0)
-logging.error(asDataFrame.head().to_string())
-
-derpprediction = classifier.predict(asDataFrame)
-
-logging.error(derpprediction)
 
 app = Flask(__name__)
 CORS(app)
@@ -63,7 +51,7 @@ CORS(app)
 def getPrediction():
 	college = request.args.get('college')
 	rings = request.args.get('rings')
-	asDataFrame = pd.DataFrame({ 'college': [college], 'rings': [rings] })
+	asDataFrame = pd.DataFrame({ 'college_' + college: [1], 'rings': [rings] })
 	asDataFrame = asDataFrame.reindex(columns = dataset.columns, fill_value=0)
 	prediction = np.array2string(classifier.predict(asDataFrame)[0])
 	return json.dumps(formatPrediction(prediction))
